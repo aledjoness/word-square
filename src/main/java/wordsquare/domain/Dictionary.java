@@ -21,7 +21,7 @@ public class Dictionary {
             dictionary.readWordsFromFile();
             return dictionary;
         } catch (IOException e) {
-            System.err.println("Unable to populate dictionary");
+            System.err.println("anable to populate dictionary");
             return new UnpopulatedDictionary();
         }
     }
