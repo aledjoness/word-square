@@ -31,18 +31,17 @@ public class Dictionary {
 
         try (BufferedReader reader = Files.newBufferedReader(path)) {
             this.words = reader.lines().toList();
-            System.out.println("Words size: " + words.size());
         }
     }
 
-    public boolean isAWord(String word) {
-        return words.contains(word);
+    public boolean isWord(String... delimitedWord) {
+        return words.contains(String.join("", delimitedWord));
     }
 
     public static class UnpopulatedDictionary extends Dictionary {
 
         @Override
-        public boolean isAWord(String word) {
+        public boolean isWord(String... delimitedWord) {
             return false;
         }
     }

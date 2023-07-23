@@ -13,16 +13,21 @@ class DictionaryTest {
     @Test
     void unpopulatedDictionaryCanNotValidateAnyWord() {
         Dictionary unpopulatedDictionary = new UnpopulatedDictionary();
-        assertThat(unpopulatedDictionary.isAWord("pizza")).isFalse();
+        assertThat(unpopulatedDictionary.isWord("pizza")).isFalse();
     }
 
     @Test
     void validatesAgainstCorrectWords() {
-        assertThat(dictionary.isAWord("pizza")).isTrue();
+        assertThat(dictionary.isWord("pizza")).isTrue();
     }
 
     @Test
     void validatesAgainstIncorrectWords() {
-        assertThat(dictionary.isAWord("badpizza")).isFalse();
+        assertThat(dictionary.isWord("badpizza")).isFalse();
+    }
+
+    @Test
+    void validatesOnDelimitedWords() {
+        assertThat(dictionary.isWord("p", "i", "z", "z", "a")).isTrue();
     }
 }
