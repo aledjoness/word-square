@@ -14,7 +14,7 @@ public class Application {
         System.out.printf("Enter %d characters to populate grid: ", size * size);
         String characters = scanner.next();
         scanner.close();
-        WordSquare wordSquare = new WordSquare(size, characters, Dictionary.populate());
+        WordSquare wordSquare = new WordSquare(size, characters, Dictionary.populate(size));
         if (wordSquare.isNotValid()) {
             System.err.println("[ERROR] WordSquare must be greater than size 1 and be populated by exactly size*size characters");
             System.exit(1);

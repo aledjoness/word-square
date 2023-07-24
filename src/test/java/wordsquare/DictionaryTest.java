@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class DictionaryTest {
 
-    private final Dictionary dictionary = Dictionary.populate();
+    private final Dictionary dictionary = Dictionary.populate(5);
 
     @Test
     void unpopulatedDictionaryCanNotValidateAnyWord() {
@@ -23,11 +23,16 @@ class DictionaryTest {
 
     @Test
     void validatesAgainstIncorrectWords() {
-        assertThat(dictionary.isWord("badpizza")).isFalse();
+        assertThat(dictionary.isWord("gbvcf")).isFalse();
     }
 
     @Test
     void validatesOnDelimitedWords() {
         assertThat(dictionary.isWord("p", "i", "z", "z", "a")).isTrue();
+    }
+
+    @Test
+    void sizeOfDictionaryPreventsLongerWordsFromBeingCorrect() {
+        assertThat(dictionary.isWord("elongate")).isFalse();
     }
 }

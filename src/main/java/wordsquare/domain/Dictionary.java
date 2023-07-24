@@ -15,10 +15,10 @@ public class Dictionary {
     private Dictionary() {
     }
 
-    public static Dictionary populate() {
+    public static Dictionary populate(int size) {
         try {
             Dictionary dictionary = new Dictionary();
-            dictionary.readWordsFromFile();
+            dictionary.readWordsFromFile(size);
             return dictionary;
         } catch (IOException e) {
             System.err.println("Unable to populate dictionary");
@@ -26,11 +26,11 @@ public class Dictionary {
         }
     }
 
-    private void readWordsFromFile() throws IOException {
+    private void readWordsFromFile(int size) throws IOException {
         Path path = Paths.get(FILE_PATH);
 
         try (BufferedReader reader = Files.newBufferedReader(path)) {
-            this.words = reader.lines().toList();
+            this.words = reader.lines().filter(word -> word.length() == size).toList();
         }
     }
 
