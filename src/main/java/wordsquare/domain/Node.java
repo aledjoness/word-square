@@ -22,6 +22,14 @@ public class Node {
         this.completeSolutions = completeSolutions;
     }
 
+    public static Node startNode(List<String> inputCharacters) {
+        return new Node(-1, new LinkedList<>(), inputCharacters, null, new LinkedList<>());
+    }
+
+    public List<Pair<List<NodeValue>, List<String>>> calculateStartingPositions() {
+        return permuteRemainingCharacters();
+    }
+
     public boolean isFinalNode() {
         return remainingCharacters.isEmpty();
     }

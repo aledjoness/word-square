@@ -53,6 +53,7 @@ public class Permutation {
         Collections.copy(remainingLettersForThisIteration, totalRemainingLetters);
         List<Pair<List<NodeValue>, List<String>>> result = new LinkedList<>();
         while (!remainingLettersForThisIteration.isEmpty()) {
+            // todo: broken
             LinkedList<NodeValue> currentPermutationFront = new LinkedList<>();
             LinkedList<NodeValue> currentPermutationBack = new LinkedList<>();
 
@@ -124,7 +125,9 @@ public class Permutation {
     }
 
     private List<NodeValue> addPermutationsTogether(List<NodeValue> currentPermutationFront, List<NodeValue> currentPermutationBack) {
-        currentPermutationFront.addAll(currentPermutationBack);
+        for (int i = currentPermutationBack.size() - 1; i >= 0; i--) {
+            currentPermutationFront.add(currentPermutationBack.get(i));
+        }
         return currentPermutationFront;
     }
 

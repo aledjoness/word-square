@@ -124,7 +124,7 @@ class WordSquareCharactersTest {
     @Test
     void solvesSize5() {
         Dictionary realDictionary = Dictionary.populate(5);
-        wordSquareCharacters = new WordSquareCharacters("aaaeeeefhhmoonssrrrrttttw", realDictionary);
+        wordSquareCharacters = new WordSquareCharacters("aabbeeeeeeeehmosrrrruttvv", realDictionary);
 
         Solution solution = wordSquareCharacters.solve();
         assertThat(solution.hasBeenFound()).isTrue();
