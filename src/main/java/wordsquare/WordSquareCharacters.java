@@ -91,9 +91,7 @@ public class WordSquareCharacters {
 
             if (dictionary.areWords(concatenatedWords)) {
                 // We have a solution
-                Solution solution = new Solution(concatenatedWords);
-                solution.printSolution();
-                return solution;
+                return new Solution(concatenatedWords);
             }
         }
         return Solution.none();

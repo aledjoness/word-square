@@ -110,4 +110,24 @@ class WordSquareCharactersTest {
         assertThat(solution.hasBeenFound()).isTrue();
         assertThat(solution.characters()).isEqualTo(List.of("sad", "ado", "dot"));
     }
+
+    @Test
+    void solvesSize4() {
+        Dictionary realDictionary = Dictionary.populate(4);
+        wordSquareCharacters = new WordSquareCharacters("eeeeddoonnnsssrv", realDictionary);
+
+        Solution solution = wordSquareCharacters.solve();
+        assertThat(solution.hasBeenFound()).isTrue();
+        assertThat(solution.characters()).isEqualTo(List.of("rose", "oven", "send", "ends"));
+    }
+
+    @Test
+    void solvesSize5() {
+        Dictionary realDictionary = Dictionary.populate(5);
+        wordSquareCharacters = new WordSquareCharacters("aaaeeeefhhmoonssrrrrttttw", realDictionary);
+
+        Solution solution = wordSquareCharacters.solve();
+        assertThat(solution.hasBeenFound()).isTrue();
+        assertThat(solution.characters()).isEqualTo(List.of("rose", "oven", "send", "ends"));
+    }
 }

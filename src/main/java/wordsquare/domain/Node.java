@@ -30,8 +30,6 @@ public class Node {
         // if current node is final node, add Node trail to completeSolutions list
         // else go one position deeper
 
-        // dd, do, ds etc.
-        // permute remaining characters, for each permutation create a new Node
         if (remainingCharacters.isEmpty()) {
             // Calculate Node trail and add to completeSolutions list
             LinkedList<Node> nodeTrail = calculateNodeTrail();

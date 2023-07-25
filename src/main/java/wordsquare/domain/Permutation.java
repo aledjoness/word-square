@@ -35,6 +35,7 @@ public class Permutation {
         characterToOccurrence = remainingCharacters.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         List<String> startingCharacters = characterToOccurrence.entrySet().stream().filter(entry -> entry.getValue() > 1).map(Map.Entry::getKey).toList();
 
+        // todo: one starting character at a time, work out all solutions, check if they're words or not
         List<Pair<List<NodeValue>, List<String>>> allPermutations = new LinkedList<>();
         for (String startingCharacter : startingCharacters) {
             allPermutations.addAll(findAllPermutations(startingCharacter));
@@ -57,6 +58,7 @@ public class Permutation {
 
             currentPermutationFront.add(new NodeValue(startingCharacter));
             currentPermutationBack.add(new NodeValue(startingCharacter));
+            boolean addThisPermutationToSolution = true;
             while (currentPermutationSizeIsLessThanHalfTheGroupSize(currentPermutationFront.size())) {
                 String nextCharacterToConsider = remainingLettersForThisIteration.getFirst();
 
@@ -73,17 +75,27 @@ public class Permutation {
                         currentPermutationFront.add(new NodeValue(nextCharacterToConsider));
                         remainingLettersForThisIteration.remove(nextCharacterToConsider);
                     } else {
-                        // todo: push non dupe letter to back
+                        // if the total remaining characters left are non dupes, discard this iteration
+                        if (remainingLettersForThisIterationAreAllNonDuplicates(remainingLettersForThisIteration)) {
+                            remainingLettersForThisIteration.clear();
+                            addThisPermutationToSolution = false;
+                            break;
+                        } else {
+                            remainingLettersForThisIteration.remove(nextCharacterToConsider);
+                            remainingLettersForThisIteration.addLast(nextCharacterToConsider);
+                        }
                     }
                 }
             }
-            // CurrentPermutation is half a mirror of the full result
-            List<String> lettersRemainingForThisIteration = new LinkedList<>(remainingCharacters);
-            Collections.copy(lettersRemainingForThisIteration, remainingCharacters);
-            List<NodeValue> combinedCurrentPermutation = addPermutationsTogether(currentPermutationFront, currentPermutationBack);
-            removeCombinedCurrentPermutationElementsFromPossibleRemainingCharacters(combinedCurrentPermutation, lettersRemainingForThisIteration);
+            if (addThisPermutationToSolution) {
+                // CurrentPermutation is half a mirror of the full result
+                List<String> lettersRemainingForThisIteration = new LinkedList<>(remainingCharacters);
+                Collections.copy(lettersRemainingForThisIteration, remainingCharacters);
+                List<NodeValue> combinedCurrentPermutation = addPermutationsTogether(currentPermutationFront, currentPermutationBack);
+                removeCombinedCurrentPermutationElementsFromPossibleRemainingCharacters(combinedCurrentPermutation, lettersRemainingForThisIteration);
 
-            addToResult(Pair.of(combinedCurrentPermutation, lettersRemainingForThisIteration), result);
+                addToResult(Pair.of(combinedCurrentPermutation, lettersRemainingForThisIteration), result);
+            }
             if (currentPermutationFront.size() == 2) {
                 // Then it only contains starting character (at start and end) and cannot add anymore
                 break;
@@ -122,5 +134,9 @@ public class Permutation {
 
     private boolean isADuplicate(String nextCharacterToConsider) {
         return characterToOccurrence.get(nextCharacterToConsider) > 1;
+    }
+
+    private boolean remainingLettersForThisIterationAreAllNonDuplicates(List<String> remainingLetters) {
+        return remainingLetters.stream().noneMatch(this::isADuplicate);
     }
 }

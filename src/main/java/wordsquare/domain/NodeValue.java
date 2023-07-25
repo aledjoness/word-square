@@ -42,4 +42,9 @@ public class NodeValue {
     public int hashCode() {
         return Objects.hash(valueToHasBeenExamined);
     }
+
+    @Override
+    public String toString() {
+        return "NodeValue{" + valueToHasBeenExamined.left() + "}";
+    }
 }
