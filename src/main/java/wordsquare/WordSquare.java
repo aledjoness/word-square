@@ -21,7 +21,6 @@ public class WordSquare {
         if (size == 2) {
             return characters.solveSize2();
         }
-        // Pick pivots, work from there
-        return Solution.none();
+        return characters.solve();
     }
 }

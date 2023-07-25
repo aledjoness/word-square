@@ -100,4 +100,14 @@ class WordSquareCharactersTest {
         assertThat(solution.hasBeenFound()).isFalse();
         assertThat(solution.characters()).isEmpty();
     }
+
+    @Test
+    void solvesSize3() {
+        Dictionary realDictionary = Dictionary.populate(3);
+        wordSquareCharacters = new WordSquareCharacters("aadddoost", realDictionary);
+
+        Solution solution = wordSquareCharacters.solve();
+        assertThat(solution.hasBeenFound()).isTrue();
+        assertThat(solution.characters()).isEqualTo(List.of("sad", "ado", "dot"));
+    }
 }

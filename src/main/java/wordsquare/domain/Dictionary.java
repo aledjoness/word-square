@@ -10,7 +10,7 @@ import java.util.List;
 public class Dictionary {
 
     private static final String FILE_PATH = "src/main/resources/eng_words.txt";
-    private List<String> words;
+    private List<String> dictionary;
 
     private Dictionary() {
     }
@@ -30,12 +30,21 @@ public class Dictionary {
         Path path = Paths.get(FILE_PATH);
 
         try (BufferedReader reader = Files.newBufferedReader(path)) {
-            this.words = reader.lines().filter(word -> word.length() == size).toList();
+            this.dictionary = reader.lines().filter(word -> word.length() == size).toList();
         }
     }
 
+    public boolean areWords(List<String> words) {
+        for (String word : words) {
+            if (!dictionary.contains(word)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public boolean isWord(String... delimitedWord) {
-        return words.contains(String.join("", delimitedWord));
+        return dictionary.contains(String.join("", delimitedWord));
     }
 
     public static class UnpopulatedDictionary extends Dictionary {

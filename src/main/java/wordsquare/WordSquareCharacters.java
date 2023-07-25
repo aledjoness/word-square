@@ -1,9 +1,11 @@
 package wordsquare;
 
 import wordsquare.domain.Dictionary;
+import wordsquare.domain.Node;
 import wordsquare.domain.Solution;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -76,6 +78,23 @@ public class WordSquareCharacters {
                 && dictionary.isWord(getDupeCharAt(0), getNonDupeCharAt(0))) {
             return new Solution(List.of(getNonDupeCharAt(1), getDupeCharAt(0),
                                         getDupeCharAt(0), getNonDupeCharAt(0)));
+        }
+        return Solution.none();
+    }
+
+    public Solution solve() {
+        Node startNode = new Node(-1, new LinkedList<>(), inputCharacters, null, new LinkedList<>());
+        List<LinkedList<Node>> solutions = startNode.calculateSolutions();
+
+        for (List<Node> node : solutions) {
+            List<String> concatenatedWords = Node.stitchNodesTogether(node, inputCharacters.size());
+
+            if (dictionary.areWords(concatenatedWords)) {
+                // We have a solution
+                Solution solution = new Solution(concatenatedWords);
+                solution.printSolution();
+                return solution;
+            }
         }
         return Solution.none();
     }
