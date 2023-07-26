@@ -42,6 +42,7 @@ public class Node {
             // Calculate Node trail and add to completeSolutions list
             LinkedList<Node> nodeTrail = calculateNodeTrail();
             completeSolutions.add(nodeTrail);
+            // TODO: Possibly work out if valid node trail here?? Could save time...
         } else {
             // Permute remaining characters, for each permutation create new Node
             List<Pair<List<NodeValue>, List<String>>> valueToRemainingCharacters = permuteRemainingCharacters();
@@ -78,6 +79,7 @@ public class Node {
             if (nodes.get(i).position == 0) {
                 wordGroups.add(nodes.get(i).value);
             } else {
+                // Grid position, middle diagonal is 0, row diagonally above is 1, row diagonally below is 2, etc.
                 if (nodes.get(i).position % 2 == 0) {
                     wordGroups.addLast(nodes.get(i).value);
                 } else {

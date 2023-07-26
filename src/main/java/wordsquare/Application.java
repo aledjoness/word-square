@@ -23,7 +23,7 @@ public class Application {
         Solution solution = wordSquare.solve();
 
         if (solution.hasBeenFound()) {
-            solution.printSolution();
+            solution.print();
         } else {
             System.out.printf("There is no solution for size %d and input %s%n", size, characters);
         }

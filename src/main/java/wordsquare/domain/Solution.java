@@ -12,13 +12,7 @@ public record Solution(List<String> characters) {
         return !characters.isEmpty();
     }
 
-    public void printSolution() {
-        System.out.println("Solution:");
-        for (int i = 0; i < characters.size(); i++) {
-            System.out.print(characters.get(i));
-            if (((i + 1) % Math.sqrt(characters.size())) == 0) {
-                System.out.println();
-            }
-        }
+    public void print() {
+        characters.forEach(System.out::println);
     }
 }

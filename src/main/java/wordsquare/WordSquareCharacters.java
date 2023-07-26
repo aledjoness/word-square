@@ -82,20 +82,29 @@ public class WordSquareCharacters {
 
     public Solution solve() {
         Node startNode = Node.startNode(inputCharacters);
-        List<Pair<List<NodeValue>, List<String>>> startingPositions = startNode.calculateStartingPositions();
-
-        for (int i = 0; i < startingPositions.size(); i++) {
-            Node nextNode = new Node(0, startingPositions.get(i).left(), startingPositions.get(i).right(), null, new LinkedList<>());
-            List<LinkedList<Node>> linkedLists = nextNode.calculateSolutions();
-            for (List<Node> node : linkedLists) {
-                List<String> concatenatedWords = Node.stitchNodesTogether(node, inputCharacters.size());
-                if (dictionary.areWords(concatenatedWords)) {
-                    // We have a solution
-                    return new Solution(concatenatedWords);
-                }
+        List<LinkedList<Node>> potentialSolutions = startNode.calculateSolutions();
+        for (List<Node> node : potentialSolutions) {
+            List<String> concatenatedWords = Node.stitchNodesTogether(node, inputCharacters.size());
+            if (dictionary.areWords(concatenatedWords)) {
+                // We have a solution
+                return new Solution(concatenatedWords);
             }
-
         }
+
+//        List<Pair<List<NodeValue>, List<String>>> startingPositions = startNode.calculateStartingPositions();
+//
+//        for (int i = 0; i < startingPositions.size(); i++) {
+//            Node nextNode = new Node(0, startingPositions.get(i).left(), startingPositions.get(i).right(), null, new LinkedList<>());
+//            List<LinkedList<Node>> linkedLists = nextNode.calculateSolutions();
+//            for (List<Node> node : linkedLists) {
+//                List<String> concatenatedWords = Node.stitchNodesTogether(node, inputCharacters.size());
+//                if (dictionary.areWords(concatenatedWords)) {
+//                    // We have a solution
+//                    return new Solution(concatenatedWords);
+//                }
+//            }
+//
+//        }
         return Solution.none();
     }
 }

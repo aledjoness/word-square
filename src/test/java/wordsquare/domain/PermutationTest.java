@@ -133,13 +133,12 @@ class PermutationTest {
         return true;
     }
 
-    // groupSize should be 1/2 of actual group size
-    static void findPermutations(char[] str, int halfGroupSize, List<String> originalInput, int index, int n, List<String> result) {
+    static void findPermutations(char[] str, int groupSize, List<String> originalInput, int index, int n, List<String> result) {
         if (index >= n) {
-            if (halfGroupSize % 2 == 0) {
-                findSubstringsForEven(new String(str), halfGroupSize, result);
+            if (groupSize % 2 == 0) {
+                findSubstringsForEven(new String(str), groupSize / 2, result);
             } else {
-                findSubstringsForOdd(new String(str), halfGroupSize, originalInput, result);
+                findSubstringsForOdd(new String(str), groupSize / 2, originalInput, result);
             }
             return;
         }
@@ -152,7 +151,7 @@ class PermutationTest {
             boolean check = shouldSwap(str, index, i);
             if (check) {
                 swap(str, index, i);
-                findPermutations(str, halfGroupSize, originalInput, index + 1, n, result);
+                findPermutations(str, groupSize, originalInput, index + 1, n, result);
                 swap(str, index, i);
             }
         }
@@ -165,47 +164,39 @@ class PermutationTest {
     }
 
     // return halved values : unused
-    private Pair<List<String>, List<String>> halveDuplicateValuesAndRemoveSingleCharacters(List<String> input) {
-        List<String> dedupedValues = new ArrayList<>();
-        List<String> unusedValues = new ArrayList<>();
+    private List<String> halveDuplicateValuesAndRemoveSingleCharacters(List<String> input) {
+        List<String> halvedDuplicateValues = new ArrayList<>();
         Map<String, Long> charToCount = input.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         for (Map.Entry<String, Long> entry : charToCount.entrySet()) {
             if (entry.getValue() % 2 == 0) {
                 int occurrencesHalved = entry.getValue().intValue() / 2;
                 for (int j = 0; j < occurrencesHalved; j++) {
-                    dedupedValues.add(entry.getKey());
+                    halvedDuplicateValues.add(entry.getKey());
                 }
             } else {
-                unusedValues.add(entry.getKey());
                 if (entry.getValue() > 2) {
                     int i = entry.getValue().intValue();
                     i--;
                     int occurrencesHalved = i / 2;
                     for (int j = 0; j < occurrencesHalved; j++) {
-                        dedupedValues.add(entry.getKey());
+                        halvedDuplicateValues.add(entry.getKey());
                     }
                 }
             }
         }
-        return Pair.of(dedupedValues, unusedValues);
+        return halvedDuplicateValues;
     }
 
     @Test
     void name() {
+        List<String> input = List.of("a", "a", "a", "e", "e", "e", "e", "f", "h", "h", "m", "o", "o", "n", "s", "s", "r", "r", "r", "r", "t", "t", "t", "t", "w");
 //        List<String> input = List.of("a", "a", "c", "c", "d", "e", "e", "e", "e", "m", "m", "n", "n", "o", "o");
-        List<String> input = List.of("a", "a", "c", "c", "d", "e", "e", "e", "f");
-        String inpoot = halveDuplicateValuesAndRemoveSingleCharacters(input).left().toString();
+//        List<String> input = List.of("a", "a", "c", "c", "d", "e", "e", "e", "f");
+        String join = String.join("", halveDuplicateValuesAndRemoveSingleCharacters(input));
 
-        String trim = inpoot.replace(",", "")  //remove the commas
-                .replace(" ", "")  //remove the right bracket
-                .replace("[", "")  //remove the right bracket
-                .replace("]", "")  //remove the left bracket
-                .trim();
-
-        char[] chars = trim.toCharArray();
-        int n = chars.length;
+        char[] chars = join.toCharArray();
         List<String> result = new ArrayList<>();
-        findPermutations(chars, 1, input, 0, n, result);
+        findPermutations(chars, 5, input, 0, chars.length, result);
 
         List<Pair<List<NodeValue>, List<String>>> realResult = new LinkedList<>();
         convertToNodeValues(input, result, realResult);
@@ -215,7 +206,7 @@ class PermutationTest {
     @Test
     void test() {
         List<String> input = List.of("a", "a", "c", "c", "d", "e", "e", "e", "e", "m", "m", "n", "n", "o", "o");
-        String inpoot = halveDuplicateValuesAndRemoveSingleCharacters(input).left().toString();
+        String inpoot = halveDuplicateValuesAndRemoveSingleCharacters(input).toString();
 
         String trim = inpoot.replace(",", "")  //remove the commas
                 .replace(" ", "")  //remove the right bracket
@@ -231,9 +222,8 @@ class PermutationTest {
 //        char[] str = {'a', 'a', 'c', 'c', 'd', 'e', 'e', 'e', 'e', 'm', 'm', 'n', 'n', 'n', 'o', 'o'};
 //        char[] str = {'a', 'a', 'e', 'e', 'b', 'b', 'c', 'e', 'c', 'x', 'y', 'y', 'y', 'y', 'y', 'y'};
 //        char[] str = {'a', 'a', 'e', 'e', 'e', 'e', 'e', 'e', 'f', 'f', 'g', 'g'};
-        int n = chars.length;
         List<String> result = new ArrayList<>();
-        findPermutations(chars, 2, input, 0, n, result);
+        findPermutations(chars, 2, input, 0, chars.length, result);
 
         List<Pair<List<NodeValue>, List<String>>> realResult = new LinkedList<>();
         convertToNodeValues(input, result, realResult);
