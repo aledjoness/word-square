@@ -44,34 +44,6 @@ public class Permutation {
         return allPermutations;
     }
 
-    private boolean isAcceptable(String currentPermutation, String startingCharacter) {
-        // Either we have groupSize == 1 (because groupSize is initially 3), so one character will always be acceptable
-        if (groupSize - 2 == 1) {
-            return currentPermutation.length() == 1;
-        }
-        if (groupSize == 2) {
-            return currentPermutation.startsWith(startingCharacter)
-                    && currentPermutation.endsWith(startingCharacter);
-        }
-        return currentPermutation.length() == groupSize - 2 // Have removed the start and end characters
-                && currentPermutation.startsWith(startingCharacter)
-                && currentPermutation.endsWith(startingCharacter)
-                && patternIsAcceptableForGroupSize(currentPermutation);
-    }
-
-    private boolean patternIsAcceptableForGroupSize(String currentPermutation) {
-        if (groupSize % 2 == 0) {
-            // Should be reflective
-            String firstHalf = currentPermutation.substring(0, currentPermutation.length() / 2 - 1);
-            String secondHalf = currentPermutation.substring(currentPermutation.length() / 2 - 1);
-            return firstHalf.equals(secondHalf);
-        }
-        // Should be reflective with the exception of the letter in the middle
-        String firstHalf = currentPermutation.substring(0, currentPermutation.length() / 2);
-        String secondHalf = currentPermutation.substring(currentPermutation.length() / 2 + 1);
-        return firstHalf.equals(secondHalf);
-    }
-
     private List<Pair<List<NodeValue>, List<String>>> findAllPermutations(String startingCharacter) {
         List<String> totalRemainingLetters = new LinkedList<>(remainingCharacters);
         Collections.copy(totalRemainingLetters, remainingCharacters);
@@ -116,21 +88,49 @@ public class Permutation {
         return realResult;
     }
 
-    public static List<String> startPermutation(final String currentPermutation) {
+    private boolean isAcceptable(String currentPermutation, String startingCharacter) {
+        // Either we have groupSize == 1 (because groupSize is initially 3), so one character will always be acceptable
+        if (groupSize - 2 == 1) {
+            return currentPermutation.length() == 1;
+        }
+        if (groupSize == 2) {
+            return currentPermutation.startsWith(startingCharacter)
+                    && currentPermutation.endsWith(startingCharacter);
+        }
+        return currentPermutation.length() == groupSize - 2 // Have removed the start and end characters
+                && currentPermutation.startsWith(startingCharacter)
+                && currentPermutation.endsWith(startingCharacter)
+                && patternIsAcceptableForGroupSize(currentPermutation);
+    }
+
+    private boolean patternIsAcceptableForGroupSize(String currentPermutation) {
+        if (groupSize % 2 == 0) {
+            // Should be reflective
+            String firstHalf = currentPermutation.substring(0, currentPermutation.length() / 2 - 1);
+            String secondHalf = currentPermutation.substring(currentPermutation.length() / 2 - 1);
+            return firstHalf.equals(secondHalf);
+        }
+        // Should be reflective with the exception of the letter in the middle
+        String firstHalf = currentPermutation.substring(0, currentPermutation.length() / 2);
+        String secondHalf = currentPermutation.substring(currentPermutation.length() / 2 + 1);
+        return firstHalf.equals(secondHalf);
+    }
+
+    public static Set<String> startPermutation(final String currentPermutation) {
         return permute("", currentPermutation);
     }
 
     // todo: limit amount of permutations
-    private static List<String> permute(final String prefix, final String currentPermutation) {
-        final List<String> permutations = new ArrayList<>();
+    private static Set<String> permute(final String prefix, final String currentPermutation) {
+        final Set<String> permutations = new HashSet<>();
 
-        final int n = currentPermutation.length();
-        if (n == 0) {
+        final int currentPermutationLength = currentPermutation.length();
+        if (currentPermutationLength == 0) {
             permutations.add(prefix);
         } else {
-            for (int i = 0; i < n; i++) {
+            for (int i = 0; i < currentPermutationLength; i++) {
                 permutations.addAll(permute(prefix + currentPermutation.charAt(i),
-                                            currentPermutation.substring(0, i) + currentPermutation.substring(i + 1, n)));
+                                            currentPermutation.substring(0, i) + currentPermutation.substring(i + 1, currentPermutationLength)));
             }
         }
         return permutations;
