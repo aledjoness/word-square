@@ -1,5 +1,6 @@
 package wordsquare.domain;
 
+import java.util.List;
 import java.util.Objects;
 
 public class NodeValue {
@@ -8,6 +9,10 @@ public class NodeValue {
 
     public NodeValue(String value) {
         this.valueToHasBeenExamined = Pair.of(value, false);
+    }
+
+    public static List<NodeValue> toNodeValues(List<String> input) {
+        return input.stream().map(NodeValue::new).toList();
     }
 
     public String getValue() {

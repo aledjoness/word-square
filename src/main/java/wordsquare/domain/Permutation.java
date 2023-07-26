@@ -3,6 +3,7 @@ package wordsquare.domain;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 
@@ -43,103 +44,105 @@ public class Permutation {
         return allPermutations;
     }
 
+    private boolean isAcceptable(String currentPermutation, String startingCharacter) {
+        // Either we have groupSize == 1 (because groupSize is initially 3), so one character will always be acceptable
+        if (groupSize - 2 == 1) {
+            return currentPermutation.length() == 1;
+        }
+        if (groupSize == 2) {
+            return currentPermutation.startsWith(startingCharacter)
+                    && currentPermutation.endsWith(startingCharacter);
+        }
+        return currentPermutation.length() == groupSize - 2 // Have removed the start and end characters
+                && currentPermutation.startsWith(startingCharacter)
+                && currentPermutation.endsWith(startingCharacter)
+                && patternIsAcceptableForGroupSize(currentPermutation);
+    }
+
+    private boolean patternIsAcceptableForGroupSize(String currentPermutation) {
+        if (groupSize % 2 == 0) {
+            // Should be reflective
+            String firstHalf = currentPermutation.substring(0, currentPermutation.length() / 2 - 1);
+            String secondHalf = currentPermutation.substring(currentPermutation.length() / 2 - 1);
+            return firstHalf.equals(secondHalf);
+        }
+        // Should be reflective with the exception of the letter in the middle
+        String firstHalf = currentPermutation.substring(0, currentPermutation.length() / 2);
+        String secondHalf = currentPermutation.substring(currentPermutation.length() / 2 + 1);
+        return firstHalf.equals(secondHalf);
+    }
+
     private List<Pair<List<NodeValue>, List<String>>> findAllPermutations(String startingCharacter) {
         List<String> totalRemainingLetters = new LinkedList<>(remainingCharacters);
         Collections.copy(totalRemainingLetters, remainingCharacters);
+
         totalRemainingLetters.remove(startingCharacter);
         totalRemainingLetters.remove(startingCharacter);
 
-        LinkedList<String> remainingLettersForThisIteration = new LinkedList<>(totalRemainingLetters);
-        Collections.copy(remainingLettersForThisIteration, totalRemainingLetters);
-        List<Pair<List<NodeValue>, List<String>>> result = new LinkedList<>();
-        while (!remainingLettersForThisIteration.isEmpty()) {
-            // todo: broken
-            LinkedList<NodeValue> currentPermutationFront = new LinkedList<>();
-            LinkedList<NodeValue> currentPermutationBack = new LinkedList<>();
+        List<Pair<List<NodeValue>, List<String>>> realResult = new LinkedList<>();
+        if (groupSize == 2) {
+            List<NodeValue> nodeValues = new LinkedList<>();
+            nodeValues.add(new NodeValue(startingCharacter));
+            nodeValues.add(new NodeValue(startingCharacter));
 
-            currentPermutationFront.add(new NodeValue(startingCharacter));
-            currentPermutationBack.add(new NodeValue(startingCharacter));
-            boolean addThisPermutationToSolution = true;
-            while (currentPermutationSizeIsLessThanHalfTheGroupSize(currentPermutationFront.size())) {
-                String nextCharacterToConsider = remainingLettersForThisIteration.getFirst();
+            realResult.add(Pair.of(nodeValues, new LinkedList<>(totalRemainingLetters)));
+            return realResult;
+        }
 
-                if (isADuplicate(nextCharacterToConsider)) {
-                    currentPermutationFront.add(new NodeValue(nextCharacterToConsider));
-                    remainingLettersForThisIteration.remove(nextCharacterToConsider);
-                    if (currentPermutationFront.size() > groupSize / 2) {
-                        break;
-                    }
-                    currentPermutationBack.add(new NodeValue(nextCharacterToConsider));
-                    remainingLettersForThisIteration.remove(nextCharacterToConsider);
-                } else {
-                    if (nextIndexPermitsNonDuplicateCharacters(currentPermutationFront.size())) {
-                        currentPermutationFront.add(new NodeValue(nextCharacterToConsider));
-                        remainingLettersForThisIteration.remove(nextCharacterToConsider);
-                    } else {
-                        // if the total remaining characters left are non dupes, discard this iteration
-                        if (remainingLettersForThisIterationAreAllNonDuplicates(remainingLettersForThisIteration)) {
-                            remainingLettersForThisIteration.clear();
-                            addThisPermutationToSolution = false;
-                            break;
-                        } else {
-                            remainingLettersForThisIteration.remove(nextCharacterToConsider);
-                            remainingLettersForThisIteration.addLast(nextCharacterToConsider);
-                        }
-                    }
-                }
+        List<String> result = new ArrayList<>();
+        Stream.of(String.join("", totalRemainingLetters))
+                .flatMap(currentPermutation -> startPermutation(currentPermutation).stream())
+                .flatMap(currentPermutation -> findSubstrings(currentPermutation).stream())
+                .distinct()
+                .filter(currentPermutation -> this.isAcceptable(currentPermutation, startingCharacter))
+                .forEach(result::add);
+
+        // Need to bookend result with starting characters
+        for (String permutation : result) {
+            // Add node values
+            List<NodeValue> nodeValues = new LinkedList<>();
+            nodeValues.add(new NodeValue(startingCharacter));
+            List<String> permutationAsList = Arrays.stream(permutation.split("")).toList();
+            nodeValues.addAll(NodeValue.toNodeValues(permutationAsList));
+            nodeValues.add(new NodeValue(startingCharacter));
+
+            // Add remaining chars
+            List<String> remainingCharsForThisPermutation = new LinkedList<>(totalRemainingLetters);
+            for (String character : permutationAsList) {
+                remainingCharsForThisPermutation.remove(character);
             }
-            if (addThisPermutationToSolution) {
-                // CurrentPermutation is half a mirror of the full result
-                List<String> lettersRemainingForThisIteration = new LinkedList<>(remainingCharacters);
-                Collections.copy(lettersRemainingForThisIteration, remainingCharacters);
-                List<NodeValue> combinedCurrentPermutation = addPermutationsTogether(currentPermutationFront, currentPermutationBack);
-                removeCombinedCurrentPermutationElementsFromPossibleRemainingCharacters(combinedCurrentPermutation, lettersRemainingForThisIteration);
+            realResult.add(Pair.of(nodeValues, remainingCharsForThisPermutation));
+        }
+        return realResult;
+    }
 
-                addToResult(Pair.of(combinedCurrentPermutation, lettersRemainingForThisIteration), result);
+    public static List<String> startPermutation(final String currentPermutation) {
+        return permute("", currentPermutation);
+    }
+
+    // todo: limit amount of permutations
+    private static List<String> permute(final String prefix, final String currentPermutation) {
+        final List<String> permutations = new ArrayList<>();
+
+        final int n = currentPermutation.length();
+        if (n == 0) {
+            permutations.add(prefix);
+        } else {
+            for (int i = 0; i < n; i++) {
+                permutations.addAll(permute(prefix + currentPermutation.charAt(i),
+                                            currentPermutation.substring(0, i) + currentPermutation.substring(i + 1, n)));
             }
-            if (currentPermutationFront.size() == 2) {
-                // Then it only contains starting character (at start and end) and cannot add anymore
-                break;
+        }
+        return permutations;
+    }
+
+    public static List<String> findSubstrings(String currentPermutation) {
+        List<String> allSubstrings = new ArrayList<>();
+        for (int i = 0; i < currentPermutation.length(); i++) {
+            for (int j = 1; j <= currentPermutation.length() - i; j++) {
+                allSubstrings.add(currentPermutation.substring(i, i + j));
             }
         }
-        return result;
-    }
-
-    private boolean currentPermutationSizeIsLessThanHalfTheGroupSize(int currentPermutationSize) {
-        if (groupSize % 2 == 0) {
-            return currentPermutationSize < (groupSize / 2);
-        }
-        return currentPermutationSize <= (groupSize / 2);
-    }
-
-    private void removeCombinedCurrentPermutationElementsFromPossibleRemainingCharacters(List<NodeValue> combinedCurrentPermutation, List<String> lettersRemainingForThisIteration) {
-        for (NodeValue permutation : combinedCurrentPermutation) {
-            lettersRemainingForThisIteration.remove(permutation.getValue());
-        }
-    }
-
-    private void addToResult(Pair<List<NodeValue>, List<String>> currentPermutation, List<Pair<List<NodeValue>, List<String>>> result) {
-        if (!result.contains(currentPermutation)) {
-            result.add(currentPermutation);
-        }
-    }
-
-    private List<NodeValue> addPermutationsTogether(List<NodeValue> currentPermutationFront, List<NodeValue> currentPermutationBack) {
-        for (int i = currentPermutationBack.size() - 1; i >= 0; i--) {
-            currentPermutationFront.add(currentPermutationBack.get(i));
-        }
-        return currentPermutationFront;
-    }
-
-    private boolean nextIndexPermitsNonDuplicateCharacters(int nextIndex) {
-        return (groupSize % 2 != 0) && (nextIndex >= groupSize / 2); // possibly >
-    }
-
-    private boolean isADuplicate(String nextCharacterToConsider) {
-        return characterToOccurrence.get(nextCharacterToConsider) > 1;
-    }
-
-    private boolean remainingLettersForThisIterationAreAllNonDuplicates(List<String> remainingLetters) {
-        return remainingLetters.stream().noneMatch(this::isADuplicate);
+        return allSubstrings;
     }
 }
