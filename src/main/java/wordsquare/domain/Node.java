@@ -2,6 +2,7 @@ package wordsquare.domain;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import wordsquare.FileHelper;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -12,47 +13,48 @@ public class Node {
     private final List<NodeValue> value;
     private final List<String> remainingCharacters;
     private Node previous;
-    private final List<LinkedList<Node>> completeSolutions;
 
-    public Node(int position, List<NodeValue> value, List<String> remainingCharacters, Node previous, List<LinkedList<Node>> completeSolutions) {
+    public Node(int position, List<NodeValue> value, List<String> remainingCharacters, Node previous) {
         this.position = position;
         this.value = value;
         this.remainingCharacters = remainingCharacters;
         this.previous = previous;
-        this.completeSolutions = completeSolutions;
     }
 
     public static Node startNode(List<String> inputCharacters) {
-        return new Node(-1, new LinkedList<>(), inputCharacters, null, new LinkedList<>());
+        return new Node(-1, new LinkedList<>(), inputCharacters, null);
     }
 
-    public List<Pair<List<NodeValue>, List<String>>> calculateStartingPositions() {
-        return permuteRemainingCharacters();
+    public int initialise() {
+        List<Pair<List<NodeValue>, List<String>>> valueToRemainingCharacters = permuteRemainingCharacters();
+        FileHelper.deleteFile();
+        FileHelper.writeToFile(valueToRemainingCharacters);
+        int numLines = valueToRemainingCharacters.size();
+        valueToRemainingCharacters.clear();
+        return numLines;
     }
 
-    public boolean isFinalNode() {
+    private boolean isFinalNode() {
         return remainingCharacters.isEmpty();
     }
 
-    public List<LinkedList<Node>> calculateSolutions() {
+    public void calculateSolutions(List<LinkedList<Node>> completeSolutions) {
         // if current node is final node, add Node trail to completeSolutions list
         // else go one position deeper
-
-        if (remainingCharacters.isEmpty()) {
+        if (isFinalNode()) {
             // Calculate Node trail and add to completeSolutions list
             LinkedList<Node> nodeTrail = calculateNodeTrail();
+            // todo: Possibly work out if valid node trail here -- could save resources
             completeSolutions.add(nodeTrail);
-            // TODO: Possibly work out if valid node trail here?? Could save time...
         } else {
             // Permute remaining characters, for each permutation create new Node
             List<Pair<List<NodeValue>, List<String>>> valueToRemainingCharacters = permuteRemainingCharacters();
 
             for (Pair<List<NodeValue>, List<String>> permutation : valueToRemainingCharacters) {
-                Node nextNode = new Node(position + 1, permutation.left(), permutation.right(), this, completeSolutions);
-                nextNode.calculateSolutions();
+                Node nextNode = new Node(position + 1, permutation.left(), permutation.right(), this);
+                nextNode.calculateSolutions(completeSolutions);
             }
         }
-        return completeSolutions;
     }
 
     private List<Pair<List<NodeValue>, List<String>>> permuteRemainingCharacters() {
@@ -72,7 +74,7 @@ public class Node {
     }
 
     public static List<String> stitchNodesTogether(List<Node> nodes, int numberOfInputCharacters) {
-        // Remove start node
+        // Remove start node if exists
         nodes.removeIf(node -> node.position == -1);
         LinkedList<List<NodeValue>> wordGroups = new LinkedList<>();
         for (int i = nodes.size() - 1; i >= 0; i--) {

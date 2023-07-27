@@ -82,29 +82,24 @@ public class WordSquareCharacters {
 
     public Solution solve() {
         Node startNode = Node.startNode(inputCharacters);
-        List<LinkedList<Node>> potentialSolutions = startNode.calculateSolutions();
-        for (List<Node> node : potentialSolutions) {
-            List<String> concatenatedWords = Node.stitchNodesTogether(node, inputCharacters.size());
-            if (dictionary.areWords(concatenatedWords)) {
-                // We have a solution
-                return new Solution(concatenatedWords);
+        // Initialises all potential nodes into start_nodes.txt
+        int numLines = startNode.initialise();
+
+        for (int i = 0; i < numLines; i++) {
+            Pair<List<NodeValue>, List<String>> nodeToRemainingCharacters = FileHelper.readFirstLine();
+            System.out.println("Reading next nodeLine: " + nodeToRemainingCharacters);
+            Node nextNode = new Node(0, nodeToRemainingCharacters.left(), nodeToRemainingCharacters.right(), null);
+            List<LinkedList<Node>> nodeTrail = new LinkedList<>();
+            nextNode.calculateSolutions(nodeTrail);
+            // todo: this could almost certainly be parallelized by threads
+            for (List<Node> node : nodeTrail) {
+                List<String> concatenatedWords = Node.stitchNodesTogether(node, inputCharacters.size());
+                if (dictionary.areWords(concatenatedWords)) {
+                    // We have a solution
+                    return new Solution(concatenatedWords);
+                }
             }
         }
-
-//        List<Pair<List<NodeValue>, List<String>>> startingPositions = startNode.calculateStartingPositions();
-//
-//        for (int i = 0; i < startingPositions.size(); i++) {
-//            Node nextNode = new Node(0, startingPositions.get(i).left(), startingPositions.get(i).right(), null, new LinkedList<>());
-//            List<LinkedList<Node>> linkedLists = nextNode.calculateSolutions();
-//            for (List<Node> node : linkedLists) {
-//                List<String> concatenatedWords = Node.stitchNodesTogether(node, inputCharacters.size());
-//                if (dictionary.areWords(concatenatedWords)) {
-//                    // We have a solution
-//                    return new Solution(concatenatedWords);
-//                }
-//            }
-//
-//        }
         return Solution.none();
     }
 }

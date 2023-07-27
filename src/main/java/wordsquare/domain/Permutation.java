@@ -57,7 +57,7 @@ public class Permutation {
         }
     }
 
-    public static void findSubstringsForEven(String currentPermutation, int halfGroupSize, List<String> result) {
+    private static void findSubstringsForEven(String currentPermutation, int halfGroupSize, List<String> result) {
         for (int i = 0; i < currentPermutation.length(); i++) {
             for (int j = 1; j <= currentPermutation.length() - i; j++) {
                 String substring = currentPermutation.substring(i, i + j);
@@ -72,7 +72,7 @@ public class Permutation {
         }
     }
 
-    public static void findSubstringsForOdd(String currentPermutation, int halfGroupSize, List<String> originalInput, List<String> result) {
+    private static void findSubstringsForOdd(String currentPermutation, int halfGroupSize, List<String> originalInput, List<String> result) {
         for (int i = 0; i < currentPermutation.length(); i++) {
             for (int j = 1; j <= currentPermutation.length() - i; j++) {
                 String substring = currentPermutation.substring(i, i + j);
@@ -126,16 +126,7 @@ public class Permutation {
         return substring + new StringBuilder(substring).reverse();
     }
 
-    static boolean shouldSwap(char[] str, int start, int curr) {
-        for (int i = start; i < curr; i++) {
-            if (str[i] == str[curr]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    static void findPermutations(char[] str, int groupSize, List<String> originalInput, int index, int n, List<String> result) {
+    private static void findPermutations(char[] str, int groupSize, List<String> originalInput, int index, int n, List<String> result) {
         if (index >= n) {
             if (groupSize % 2 == 0) {
                 findSubstringsForEven(new String(str), groupSize / 2, result);
@@ -146,7 +137,6 @@ public class Permutation {
         }
 
         for (int i = index; i < n; i++) {
-
             // Proceed further for str[i] only if it
             // doesn't match with any of the characters
             // after str[index]
@@ -159,7 +149,16 @@ public class Permutation {
         }
     }
 
-    static void swap(char[] str, int i, int j) {
+    private static boolean shouldSwap(char[] str, int start, int curr) {
+        for (int i = start; i < curr; i++) {
+            if (str[i] == str[curr]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static void swap(char[] str, int i, int j) {
         char c = str[i];
         str[i] = str[j];
         str[j] = c;

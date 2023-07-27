@@ -128,6 +128,6 @@ class WordSquareCharactersTest {
 
         Solution solution = wordSquareCharacters.solve();
         assertThat(solution.hasBeenFound()).isTrue();
-        assertThat(solution.characters()).isEqualTo(List.of("rose", "oven", "send", "ends"));
+        assertThat(solution.characters()).isEqualTo(List.of("heart", "ember", "above", "revue", "trees"));
     }
 }
