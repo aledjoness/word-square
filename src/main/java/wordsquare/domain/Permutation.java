@@ -17,7 +17,7 @@ public class Permutation {
     }
 
     // Returns PossibleValues : RemainingValues
-    // todo: change return type to something more readable
+    // todo: change return type to something more readable such a Permutations
     public List<Pair<List<NodeValue>, List<String>>> calculatePermutations() {
         List<Pair<List<NodeValue>, List<String>>> result = new LinkedList<>();
         if (groupSize == 1) {
@@ -32,9 +32,8 @@ public class Permutation {
         }
 
         String inputMinusDuplicatesAndSingles = String.join("", halveDuplicateValuesAndRemoveSingleCharacters(remainingCharacters));
-        char[] chars = inputMinusDuplicatesAndSingles.toCharArray();
         List<String> permutations = new ArrayList<>();
-        findPermutations(chars, groupSize, remainingCharacters, 0, chars.length, permutations);
+        findPermutations(0, inputMinusDuplicatesAndSingles, groupSize, remainingCharacters, permutations);
 
         List<Pair<List<NodeValue>, List<String>>> permutationsToRemainingCharacters = new LinkedList<>();
         convertToNodeValues(remainingCharacters, permutations, permutationsToRemainingCharacters);
@@ -126,42 +125,42 @@ public class Permutation {
         return substring + new StringBuilder(substring).reverse();
     }
 
-    private static void findPermutations(char[] str, int groupSize, List<String> originalInput, int index, int n, List<String> result) {
-        if (index >= n) {
+    private static void findPermutations(int index, String str, int groupSize, List<String> originalInput, List<String> result) {
+        // Base case
+        if (index == (str.length() - 1)) {
             if (groupSize % 2 == 0) {
-                findSubstringsForEven(new String(str), groupSize / 2, result);
+                findSubstringsForEven(str, groupSize / 2, result);
             } else {
-                findSubstringsForOdd(new String(str), groupSize / 2, originalInput, result);
+                findSubstringsForOdd(str, groupSize / 2, originalInput, result);
             }
             return;
         }
 
-        for (int i = index; i < n; i++) {
-            // Proceed further for str[i] only if it
-            // doesn't match with any of the characters
-            // after str[index]
-            boolean check = shouldSwap(str, index, i);
-            if (check) {
-                swap(str, index, i);
-                findPermutations(str, groupSize, originalInput, index + 1, n, result);
-                swap(str, index, i);
+        char prev = '*';
+
+        // Loop from j = 1 to length of String
+        for (int j = index; j < str.length(); j++) {
+            char[] temp = str.toCharArray();
+            if (j > index && temp[index] == temp[j]) {
+                continue;
             }
+            if (prev != '*' && prev == str.charAt(j)) {
+                continue;
+            }
+
+            // Swap the elements
+            swap2(temp, index, j);
+            prev = str.charAt(j);
+
+            // Recursion call
+            findPermutations(index + 1, String.valueOf(temp), groupSize, originalInput, result);
         }
     }
 
-    private static boolean shouldSwap(char[] str, int start, int curr) {
-        for (int i = start; i < curr; i++) {
-            if (str[i] == str[curr]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static void swap(char[] str, int i, int j) {
-        char c = str[i];
-        str[i] = str[j];
-        str[j] = c;
+    private static void swap2(char[] arr, int i, int j) {
+        char temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
     }
 
     private List<String> halveDuplicateValuesAndRemoveSingleCharacters(List<String> input) {
