@@ -43,7 +43,7 @@ class NodeTest {
                              Node.startNode(List.of("a", "a", "b", "c")));
 
         List<LinkedList<Node>> solutions = new LinkedList<>();
-        node.calculateSolutions(solutions);
+        node.calculateFullSolutions(solutions);
 
         List<Node> expected1 = List.of(new Node(2,
                                                 List.of(new NodeValue("c")),
@@ -105,8 +105,8 @@ class NodeTest {
 
         // E.g. stitching i t into words (it, to)
         //                t o
-        List<String> stichedTogether = Node.stitchNodesTogether(new LinkedList<>(nodes), 4);
+        List<String> stitchedTogether = Node.stitchNodesTogether(new LinkedList<>(nodes), 4);
 
-        assertThat(stichedTogether).containsExactly("it", "to");
+        assertThat(stitchedTogether).containsExactly("it", "to");
     }
 }

@@ -40,7 +40,8 @@ public class NodeValue {
             return false;
         }
         NodeValue nodeValue = (NodeValue) o;
-        return Objects.equals(valueToHasBeenExamined, nodeValue.valueToHasBeenExamined);
+        return Objects.equals(valueToHasBeenExamined.left(), nodeValue.valueToHasBeenExamined.left())
+                && Objects.equals(valueToHasBeenExamined.right(), nodeValue.valueToHasBeenExamined.right());
     }
 
     @Override

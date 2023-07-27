@@ -21,6 +21,7 @@ public class WordSquare {
         if (size == 2) {
             return characters.solveSize2();
         }
+        characters.solve2();
         return characters.solve();
     }
 }

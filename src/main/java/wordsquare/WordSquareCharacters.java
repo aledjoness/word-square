@@ -80,6 +80,40 @@ public class WordSquareCharacters {
         return Solution.none();
     }
 
+    public Solution solve2() {
+        // noOfGroups = wordSize * 2 - 1
+        Node preWorkNode = Node.startNode(inputCharacters);
+
+        // Initialises all potential nodes into start_nodes.txt
+//        int numLines = startNode.initialise();
+
+        for (int i = 0; i < 1; i++) {
+            Pair<List<NodeValue>, List<String>> nodeToRemainingCharacters = FileHelper.readFirstLine();
+            System.out.println("Reading next nodeLine: " + nodeToRemainingCharacters);
+            Node startNode = new Node(0, nodeToRemainingCharacters.left(), nodeToRemainingCharacters.right(), null);
+//            Node nextNode = new Node(0, new LinkedList<>(), nodeToRemainingCharacters.right(), startNode);
+
+            List<LinkedList<Node>> viableSolutions = new LinkedList<>();
+            startNode.calculateViableSolutions(viableSolutions, inputCharacters.size(), dictionary);
+
+            // For each viable solution, calculate whether it is actually a solution by now using the remaining
+            // characters to populate the bottom of the grid
+            // We have a list of a list of nodes,
+
+
+            // todo: this could almost certainly be parallelized by threads
+            for (List<Node> node : viableSolutions) {
+                List<String> concatenatedWords = Node.stitchNodesTogether(node, inputCharacters.size());
+                if (dictionary.areWords(concatenatedWords)) {
+                    // We have a solution
+                    return new Solution(concatenatedWords);
+                }
+            }
+        }
+        return Solution.none();
+
+    }
+
     public Solution solve() {
         Node startNode = Node.startNode(inputCharacters);
         // Initialises all potential nodes into start_nodes.txt
@@ -90,7 +124,7 @@ public class WordSquareCharacters {
             System.out.println("Reading next nodeLine: " + nodeToRemainingCharacters);
             Node nextNode = new Node(0, nodeToRemainingCharacters.left(), nodeToRemainingCharacters.right(), null);
             List<LinkedList<Node>> nodeTrail = new LinkedList<>();
-            nextNode.calculateSolutions(nodeTrail);
+            nextNode.calculateFullSolutions(nodeTrail);
             // todo: this could almost certainly be parallelized by threads
             for (List<Node> node : nodeTrail) {
                 List<String> concatenatedWords = Node.stitchNodesTogether(node, inputCharacters.size());
