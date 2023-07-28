@@ -106,9 +106,9 @@ class WordSquareCharactersTest {
         Dictionary realDictionary = Dictionary.populate(3);
         wordSquareCharacters = new WordSquareCharacters("aadddoost", realDictionary);
 
-        Solution solution = wordSquareCharacters.solve();
-        assertThat(solution.hasBeenFound()).isTrue();
-        assertThat(solution.characters()).isEqualTo(List.of("sad", "ado", "dot"));
+        List<Solution> solution = wordSquareCharacters.solve();
+        assertThat(solution.get(0).hasBeenFound()).isTrue();
+        assertThat(solution.get(0).characters()).isEqualTo(List.of("sad", "ado", "dot"));
     }
 
     @Test
@@ -116,9 +116,9 @@ class WordSquareCharactersTest {
         Dictionary realDictionary = Dictionary.populate(4);
         wordSquareCharacters = new WordSquareCharacters("eeeeddoonnnsssrv", realDictionary);
 
-        Solution solution = wordSquareCharacters.solve();
-        assertThat(solution.hasBeenFound()).isTrue();
-        assertThat(solution.characters()).isEqualTo(List.of("rose", "oven", "send", "ends"));
+        List<Solution> solution = wordSquareCharacters.solve();
+        assertThat(solution.get(0).hasBeenFound()).isTrue();
+        assertThat(solution.get(0).characters()).isEqualTo(List.of("rose", "oven", "send", "ends"));
     }
 
     @Test
@@ -126,8 +126,8 @@ class WordSquareCharactersTest {
         Dictionary realDictionary = Dictionary.populate(5);
         wordSquareCharacters = new WordSquareCharacters("aabbeeeeeeeehmosrrrruttvv", realDictionary);
 
-        Solution solution = wordSquareCharacters.solve();
-        assertThat(solution.hasBeenFound()).isTrue();
-        assertThat(solution.characters()).isEqualTo(List.of("heart", "ember", "above", "revue", "trees"));
+        List<Solution> solution = wordSquareCharacters.solve();
+        assertThat(solution.get(0).hasBeenFound()).isTrue();
+        assertThat(solution.get(0).characters()).isEqualTo(List.of("heart", "ember", "above", "revue", "trees"));
     }
 }

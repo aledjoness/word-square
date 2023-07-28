@@ -16,6 +16,32 @@ public class Permutation {
         this.remainingCharacters = remainingCharacters;
     }
 
+    public List<Pair<List<NodeValue>, List<String>>> calculatePermutations2() {
+        List<Pair<List<NodeValue>, List<String>>> result = new LinkedList<>();
+        if (groupSize == 1) {
+            if (remainingCharacters.size() == 1) {
+                result.add(Pair.of(List.of(new NodeValue(remainingCharacters.get(0))), new LinkedList<>()));
+            } else {
+                for (String remainingChar: remainingCharacters) {
+                    List<String> remainingCharsMinusCurrentChar = new LinkedList<>(remainingCharacters);
+                    remainingCharsMinusCurrentChar.remove(remainingChar);
+                    result.add(Pair.of(List.of(new NodeValue(remainingChar)), remainingCharsMinusCurrentChar));
+                }
+            }
+            return result;
+        }
+
+        String inputMinusDuplicatesAndSingles = String.join("", halveDuplicateValuesAndRemoveSingleCharacters(remainingCharacters));
+        List<String> permutations = new ArrayList<>();
+        findPermutations(0, inputMinusDuplicatesAndSingles, groupSize, remainingCharacters, permutations);
+
+        // todo: dupe list
+        List<Pair<List<NodeValue>, List<String>>> permutationsToRemainingCharacters = new LinkedList<>();
+        convertToNodeValues(remainingCharacters, permutations, permutationsToRemainingCharacters);
+
+        return permutationsToRemainingCharacters;
+    }
+
     // Returns PossibleValues : RemainingValues
     // todo: change return type to something more readable such a Permutations
     public List<Pair<List<NodeValue>, List<String>>> calculatePermutations() {
@@ -24,7 +50,7 @@ public class Permutation {
             if (remainingCharacters.size() == 1) {
                 result.add(Pair.of(List.of(new NodeValue(remainingCharacters.get(0))), new LinkedList<>()));
             } else {
-                // Group size = 2
+                // Total remaining characters size = 2
                 result.add(Pair.of(List.of(new NodeValue(remainingCharacters.get(0))), new LinkedList<>(singletonList(remainingCharacters.get(1)))));
                 result.add(Pair.of(List.of(new NodeValue(remainingCharacters.get(1))), new LinkedList<>(singletonList(remainingCharacters.get(0)))));
             }
@@ -97,10 +123,7 @@ public class Permutation {
         String mirroredCurrentPermutation = completeRestOfGroupBySymmetry(currentPermutation);
         List<String> permutationAsList = Arrays.stream(mirroredCurrentPermutation.split("")).collect(Collectors.toList());
 
-        // Because currentPermutation is half a symmetric representation of what the actual group is, we need to remove
-        // from originalInput twice
         for (String character : permutationAsList) {
-            remainingCharactersToUse.remove(character);
             remainingCharactersToUse.remove(character);
         }
 

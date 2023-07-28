@@ -3,6 +3,8 @@ package wordsquare;
 import wordsquare.domain.Dictionary;
 import wordsquare.domain.Solution;
 
+import java.util.List;
+
 public class WordSquare {
 
     private final int size;
@@ -17,11 +19,10 @@ public class WordSquare {
         return size <= 1 || characters.count() != (size * size);
     }
 
-    public Solution solve() {
+    public List<Solution> solve() {
         if (size == 2) {
-            return characters.solveSize2();
+            return List.of(characters.solveSize2());
         }
-        characters.solve2();
         return characters.solve();
     }
 }

@@ -3,6 +3,7 @@ package wordsquare;
 import wordsquare.domain.Dictionary;
 import wordsquare.domain.Solution;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Application {
@@ -20,10 +21,10 @@ public class Application {
             System.exit(1);
         }
 
-        Solution solution = wordSquare.solve();
+        List<Solution> solutions = wordSquare.solve();
 
-        if (solution.hasBeenFound()) {
-            solution.print();
+        if (solutions.get(0).hasBeenFound()) {
+            solutions.forEach(Solution::print);
         } else {
             System.out.printf("There is no solution for size %d and input %s%n", size, characters);
         }

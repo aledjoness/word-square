@@ -13,7 +13,8 @@ public record Solution(List<String> characters) {
     }
 
     public void print() {
-        System.out.println("Solution: ");
+        System.out.println("--- Solution: ---");
         characters.forEach(System.out::println);
+        System.out.println("-----------------");
     }
 }

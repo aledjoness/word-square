@@ -13,7 +13,7 @@ public class Node {
     private final int position; // e.g. 0 = middle diagonal
     private final List<NodeValue> value;
     private final List<String> remainingCharacters;
-    private Node previous;
+    private final Node previous;
 
     public Node(int position, List<NodeValue> value, List<String> remainingCharacters, Node previous) {
         this.position = position;
@@ -22,7 +22,23 @@ public class Node {
         this.previous = previous;
     }
 
-    public static Node startNode(List<String> inputCharacters) {
+    public int getPosition() {
+        return position;
+    }
+
+    public List<NodeValue> getValue() {
+        return value;
+    }
+
+    public List<String> getRemainingCharacters() {
+        return remainingCharacters;
+    }
+
+    public Node getPrevious() {
+        return previous;
+    }
+
+    public static Node initialiseNode(List<String> inputCharacters) {
         return new Node(-1, new LinkedList<>(), inputCharacters, null);
     }
 
@@ -39,17 +55,17 @@ public class Node {
         return remainingCharacters.isEmpty();
     }
 
-    private boolean isEndOfGrid(int numberOfInputCharacters) {
+    private boolean isTopOfGrid(int numberOfInputCharacters) {
         int wordSize = (int) Math.sqrt(numberOfInputCharacters);
-        int noOfGroupsExceptStartGroup = wordSize * 2;
-        return this.position == noOfGroupsExceptStartGroup / 2 - 1;
+        int noOfGroupsPlus1 = wordSize * 2;
+        return this.position == noOfGroupsPlus1 / 2 - 1;
     }
 
     // todo: extract numberOfInputChars to variable
     public void calculateViableSolutions(List<LinkedList<Node>> viableSolutions, int numberOfInputCharacters, Dictionary dictionary) {
         // if current node is final node, add Node trail to completeSolutions list
         // else go one position deeper
-        if (isEndOfGrid(numberOfInputCharacters)) {
+        if (isTopOfGrid(numberOfInputCharacters)) {
             // Do we have a valid word? If yes, consider it by doing a full calculation.
             // This should be a a prelim check to see if there's a word at the top.
 
@@ -77,21 +93,29 @@ public class Node {
         }
     }
 
-    public void calculateFullSolutions(List<LinkedList<Node>> completeSolutions) {
+    public void calculateBottomHalfViableSolutions(List<List<String>> completeSolutions, int numberOfInputCharacters, Dictionary dictionary) {
         // if current node is final node, add Node trail to completeSolutions list
         // else go one position deeper
         if (isFinalNode()) {
             // Calculate Node trail and add to completeSolutions list
             LinkedList<Node> nodeTrail = calculateNodeTrail();
-            // todo: Possibly work out if valid node trail here -- could save resources
-            completeSolutions.add(nodeTrail);
+
+            // todo: make a List<Word> where Word has access to Dictionary
+            List<String> stitchedNodes = stitchNodesTogether(nodeTrail, numberOfInputCharacters);
+            if (dictionary.areWords(stitchedNodes)) {
+                // We have a grid of full words
+                if (!completeSolutions.contains(stitchedNodes)) {
+                    completeSolutions.add(stitchedNodes);
+                }
+            }
         } else {
             // Permute remaining characters, for each permutation create new Node
-            List<Pair<List<NodeValue>, List<String>>> valueToRemainingCharacters = permuteRemainingCharacters();
+            int nextPosition = (int) (position % (Math.sqrt(numberOfInputCharacters) - 1)) + 1;
+            List<Pair<List<NodeValue>, List<String>>> valueToRemainingCharacters = permuteViableRemainingCharactersForNextGroup(numberOfInputCharacters, nextPosition);
 
             for (Pair<List<NodeValue>, List<String>> permutation : valueToRemainingCharacters) {
-                Node nextNode = new Node(position + 1, permutation.left(), permutation.right(), this);
-                nextNode.calculateFullSolutions(completeSolutions);
+                Node nextNode = new Node(nextPosition, permutation.left(), permutation.right(), this);
+                nextNode.calculateBottomHalfViableSolutions(completeSolutions, numberOfInputCharacters, dictionary);
             }
         }
     }
@@ -101,7 +125,7 @@ public class Node {
         int wordSizeAtCurrentPosition = wordSizeAtBeginning - nextPosition;
 
         Permutation permutation = new Permutation(wordSizeAtCurrentPosition, remainingCharacters);
-        return permutation.calculatePermutations();
+        return permutation.calculatePermutations2();
     }
 
     private List<Pair<List<NodeValue>, List<String>>> permuteRemainingCharacters() {
@@ -113,9 +137,10 @@ public class Node {
     private LinkedList<Node> calculateNodeTrail() {
         LinkedList<Node> nodeTrail = new LinkedList<>();
         nodeTrail.add(this);
-        while (previous != null) {
-            nodeTrail.add(previous);
-            previous = previous.previous;
+        Node previousPointer = previous;
+        while (previousPointer != null) {
+            nodeTrail.add(previousPointer);
+            previousPointer = previousPointer.previous;
         }
         return nodeTrail;
     }
@@ -133,42 +158,43 @@ public class Node {
         // If the top word is a word and the left hand side word is also a word, then we can nominate this as a
         // candidate for a 'full' solution check
         // We are looking for the first and last values of each node, and then we need to stitch them together
-        // We can do this by having two lists -- representing both potential words
-        // The last node will only have one letter which is shared by both potential words, so we should add this twice
-        // to both lists
-        List<String> topWord = new LinkedList<>();
+        // Because of the pattern matching and filtering we know that the top and side word will be the same, so we
+        // only need to check one of them
         List<String> sideWord = new LinkedList<>();
         for (int i = 0; i < nodes.size(); i++) {
-            if (i == 0) {
-                topWord.add(nodes.get(i).value.get(0).getValue());
-                sideWord.add(nodes.get(i).value.get(0).getValue());
-            } else {
-                topWord.add(nodes.get(i).value.get(nodes.get(i).value.size() - 1).getValue());
-                sideWord.add(nodes.get(i).value.get(0).getValue());
-            }
+            sideWord.add(nodes.get(i).value.get(0).getValue());
         }
-        String topWordConcat = String.join("", topWord);
-        String sideWordConcat = String.join("", sideWord);
-
-        return List.of(topWordConcat, sideWordConcat);
+        return List.of(String.join("", sideWord));
     }
 
     public static List<String> stitchNodesTogether(List<Node> nodes, int numberOfInputCharacters) {
         // Remove start node if exists
+
+        // Example grid below:
+        //      f  e  a  s  t
+        //   4  e  a  r  t  h
+        //   3  a  r  m  o  r
+        //   2  s  t  o  n  e
+        //   1  t  h  r  e  w
+        //    0  1  2  3  4
+        //
+        // Numbers always point diagonally up right, e.g. group 0 is ttmtt
         nodes.removeIf(node -> node.position == -1);
         LinkedList<List<NodeValue>> wordGroups = new LinkedList<>();
-        for (int i = nodes.size() - 1; i >= 0; i--) {
-            if (nodes.get(i).position == 0) {
+        for (int i = 0; i < nodes.size() / 2; i++) {
+            if (i == 0) {
+                // 0th node (i.e. bottom right hand of the grid, should be at the back)
                 wordGroups.add(nodes.get(i).value);
             } else {
-                // Grid position, middle diagonal is 0, row diagonally above is 1, row diagonally below is 2, etc.
-                if (nodes.get(i).position % 2 == 0) {
-                    wordGroups.addLast(nodes.get(i).value);
-                } else {
-                    wordGroups.addFirst(nodes.get(i).value);
-                }
+                wordGroups.addFirst(nodes.get(i).value);
             }
         }
+        wordGroups.addFirst(nodes.get(nodes.size() - 1).value);
+        for (int i = nodes.size() - 2; i > nodes.size() / 2 - 1; i--) {
+            wordGroups.addFirst(nodes.get(i).value);
+        }
+
+        // Strategy is add the bottom numbers 4->3->2->1, then 0, then prepend side numbers 1->2->3->4
         // Use a moving window to create words
         int wordSize = (int) Math.sqrt(numberOfInputCharacters);
         int noOfGroups = wordSize * 2 - 1;
@@ -208,7 +234,6 @@ public class Node {
         return ImmutableList.copyOf(Splitter.fixedLength(wordSize).split(concatenatedWords.toString()));
     }
 
-    // todo: possibly don't need
     @Override
     public boolean equals(Object o) {
         if (this == o) {
