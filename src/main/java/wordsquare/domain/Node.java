@@ -61,7 +61,6 @@ public class Node {
         return this.position == noOfGroupsPlus1 / 2 - 1;
     }
 
-    // todo: extract numberOfInputChars to variable
     public void calculateViableSolutions(List<LinkedList<Node>> viableSolutions, int numberOfInputCharacters, Dictionary dictionary) {
         // if current node is final node, add Node trail to completeSolutions list
         // else go one position deeper
@@ -75,7 +74,6 @@ public class Node {
             // Calculate Node trail and add to completeSolutions list
             LinkedList<Node> nodeTrail = calculateNodeTrail();
 
-            // todo: make a List<Word> where Word has access to Dictionary
             List<String> topAndLeftSideWord = findTopAndLeftSideWord(nodeTrail);
             if (dictionary.areWords(topAndLeftSideWord)) {
                 if (!viableSolutions.contains(nodeTrail)) {
@@ -103,7 +101,7 @@ public class Node {
             // todo: make a List<Word> where Word has access to Dictionary
             List<String> stitchedNodes = stitchNodesTogether(nodeTrail, numberOfInputCharacters);
             if (dictionary.areWords(stitchedNodes)) {
-                // We have a grid of full words
+                // We have a grid of full (valid) words
                 if (!completeSolutions.contains(stitchedNodes)) {
                     completeSolutions.add(stitchedNodes);
                 }
@@ -125,7 +123,7 @@ public class Node {
         int wordSizeAtCurrentPosition = wordSizeAtBeginning - nextPosition;
 
         Permutation permutation = new Permutation(wordSizeAtCurrentPosition, remainingCharacters);
-        return permutation.calculatePermutations2();
+        return permutation.calculatePermutations();
     }
 
     private List<Pair<List<NodeValue>, List<String>>> permuteRemainingCharacters() {

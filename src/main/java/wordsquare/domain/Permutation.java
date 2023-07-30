@@ -4,8 +4,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.singletonList;
-
 public class Permutation {
 
     private final int groupSize;
@@ -16,58 +14,31 @@ public class Permutation {
         this.remainingCharacters = remainingCharacters;
     }
 
-    public List<Pair<List<NodeValue>, List<String>>> calculatePermutations2() {
-        List<Pair<List<NodeValue>, List<String>>> result = new LinkedList<>();
+    public List<Pair<List<NodeValue>, List<String>>> calculatePermutations() {
+        List<Pair<List<NodeValue>, List<String>>> permutationsToRemainingCharacters = new LinkedList<>();
         if (groupSize == 1) {
             if (remainingCharacters.size() == 1) {
-                result.add(Pair.of(List.of(new NodeValue(remainingCharacters.get(0))), new LinkedList<>()));
+                permutationsToRemainingCharacters.add(Pair.of(List.of(new NodeValue(remainingCharacters.get(0))), new LinkedList<>()));
             } else {
-                for (String remainingChar: remainingCharacters) {
+                for (String remainingChar : remainingCharacters) {
                     List<String> remainingCharsMinusCurrentChar = new LinkedList<>(remainingCharacters);
                     remainingCharsMinusCurrentChar.remove(remainingChar);
-                    result.add(Pair.of(List.of(new NodeValue(remainingChar)), remainingCharsMinusCurrentChar));
+                    permutationsToRemainingCharacters.add(Pair.of(List.of(new NodeValue(remainingChar)), remainingCharsMinusCurrentChar));
                 }
             }
-            return result;
+            return permutationsToRemainingCharacters;
         }
 
         String inputMinusDuplicatesAndSingles = String.join("", halveDuplicateValuesAndRemoveSingleCharacters(remainingCharacters));
         List<String> permutations = new ArrayList<>();
         findPermutations(0, inputMinusDuplicatesAndSingles, groupSize, remainingCharacters, permutations);
 
-        // todo: dupe list
-        List<Pair<List<NodeValue>, List<String>>> permutationsToRemainingCharacters = new LinkedList<>();
         convertToNodeValues(remainingCharacters, permutations, permutationsToRemainingCharacters);
 
         return permutationsToRemainingCharacters;
     }
 
-    // Returns PossibleValues : RemainingValues
-    // todo: change return type to something more readable such a Permutations
-    public List<Pair<List<NodeValue>, List<String>>> calculatePermutations() {
-        List<Pair<List<NodeValue>, List<String>>> result = new LinkedList<>();
-        if (groupSize == 1) {
-            if (remainingCharacters.size() == 1) {
-                result.add(Pair.of(List.of(new NodeValue(remainingCharacters.get(0))), new LinkedList<>()));
-            } else {
-                // Total remaining characters size = 2
-                result.add(Pair.of(List.of(new NodeValue(remainingCharacters.get(0))), new LinkedList<>(singletonList(remainingCharacters.get(1)))));
-                result.add(Pair.of(List.of(new NodeValue(remainingCharacters.get(1))), new LinkedList<>(singletonList(remainingCharacters.get(0)))));
-            }
-            return result;
-        }
-
-        String inputMinusDuplicatesAndSingles = String.join("", halveDuplicateValuesAndRemoveSingleCharacters(remainingCharacters));
-        List<String> permutations = new ArrayList<>();
-        findPermutations(0, inputMinusDuplicatesAndSingles, groupSize, remainingCharacters, permutations);
-
-        List<Pair<List<NodeValue>, List<String>>> permutationsToRemainingCharacters = new LinkedList<>();
-        convertToNodeValues(remainingCharacters, permutations, permutationsToRemainingCharacters);
-
-        return permutationsToRemainingCharacters;
-    }
-
-    private void convertToNodeValues(List<String> input, List<String> result, List<Pair<List<NodeValue>, List<String>>> realResult) {
+    private void convertToNodeValues(List<String> input, List<String> result, List<Pair<List<NodeValue>, List<String>>> nodeValuesToRemainingCharacters) {
         for (String permutation : result) {
             // Add node values
             List<String> permutationAsList = Arrays.stream(permutation.split("")).toList();
@@ -78,11 +49,11 @@ public class Permutation {
             for (String character : permutationAsList) {
                 remainingCharsForThisPermutation.remove(character);
             }
-            realResult.add(Pair.of(nodeValues, remainingCharsForThisPermutation));
+            nodeValuesToRemainingCharacters.add(Pair.of(nodeValues, remainingCharsForThisPermutation));
         }
     }
 
-    private static void findSubstringsForEven(String currentPermutation, int halfGroupSize, List<String> result) {
+    private static void findSubstringsForEvenGroupSize(String currentPermutation, int halfGroupSize, List<String> result) {
         for (int i = 0; i < currentPermutation.length(); i++) {
             for (int j = 1; j <= currentPermutation.length() - i; j++) {
                 String substring = currentPermutation.substring(i, i + j);
@@ -97,13 +68,13 @@ public class Permutation {
         }
     }
 
-    private static void findSubstringsForOdd(String currentPermutation, int halfGroupSize, List<String> originalInput, List<String> result) {
+    private static void findSubstringsForOddGroupSize(String currentPermutation, int halfGroupSize, List<String> remainingChars, List<String> result) {
         for (int i = 0; i < currentPermutation.length(); i++) {
             for (int j = 1; j <= currentPermutation.length() - i; j++) {
                 String substring = currentPermutation.substring(i, i + j);
                 if (substring.length() == halfGroupSize) {
                     // If odd then we have a symmetric group until the midpoint, now we just need to add all remaining chars
-                    List<List<String>> possiblePermutationsFromCurrentSymmetry = findAllPossibleMiddleValues(substring, originalInput);
+                    List<List<String>> possiblePermutationsFromCurrentSymmetry = findAllPossibleMiddleValues(substring, remainingChars);
 
                     for (List<String> possiblePermutation : possiblePermutationsFromCurrentSymmetry) {
                         String permutationAsString = String.join("", possiblePermutation);
@@ -152,9 +123,9 @@ public class Permutation {
         // Base case
         if (index == (str.length() - 1)) {
             if (groupSize % 2 == 0) {
-                findSubstringsForEven(str, groupSize / 2, result);
+                findSubstringsForEvenGroupSize(str, groupSize / 2, result);
             } else {
-                findSubstringsForOdd(str, groupSize / 2, originalInput, result);
+                findSubstringsForOddGroupSize(str, groupSize / 2, originalInput, result);
             }
             return;
         }

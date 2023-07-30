@@ -81,30 +81,34 @@ public class WordSquareCharacters {
     }
 
     public List<Solution> solve() {
+        System.out.println("--- Starting permutation of initial combinations ---");
         Node initNode = Node.initialiseNode(inputCharacters);
         // Initialises all potential nodes into start_nodes.txt
         int numLines = initNode.initialise();
+        System.out.println("--- Finished permuting all initial combinations ---");
+        System.out.println("--- Looking for solution... ---");
 
         for (int i = 0; i < numLines; i++) {
             Pair<List<NodeValue>, List<String>> nodeToRemainingCharacters = FileHelper.readFirstLine();
-            System.out.println("Reading next nodeLine: " + nodeToRemainingCharacters);
+            System.out.println("Assessing viability of next permutation (" + nodeToRemainingCharacters + ")");
             Node startNode = new Node(0, nodeToRemainingCharacters.left(), nodeToRemainingCharacters.right(), null);
 
-            List<LinkedList<Node>> viableSolutions = new LinkedList<>();
-            startNode.calculateViableSolutions(viableSolutions, inputCharacters.size(), dictionary);
+            // Viable solutions are one where the top and left side word are valid English words
+            List<LinkedList<Node>> viableTopHalfSolutions = new LinkedList<>();
+            startNode.calculateViableSolutions(viableTopHalfSolutions, inputCharacters.size(), dictionary);
 
             // For each viable solution, calculate whether it is actually a solution by now using the remaining
             // characters to populate the bottom half of the grid
             // Set the previous of the last node to the new node we're creating, pass in the remaining characters from
             // that node, so we should end up with a complete set
-            List<List<String>> viable2 = new LinkedList<>();
-            for (LinkedList<Node> nodes3 : viableSolutions) {
-                Node previousNode = nodes3.get(0);
-                Node startNode2ElectricBoogaloo = new Node(previousNode.getPosition(), previousNode.getValue(), previousNode.getRemainingCharacters(), previousNode.getPrevious());
-                startNode2ElectricBoogaloo.calculateBottomHalfViableSolutions(viable2, inputCharacters.size(), dictionary);
-                if (!viable2.isEmpty()) {
+            List<List<String>> viableTotalSolutions = new LinkedList<>();
+            for (LinkedList<Node> viableSolution : viableTopHalfSolutions) {
+                Node previousNode = viableSolution.get(0);
+                Node nextNode = new Node(previousNode.getPosition(), previousNode.getValue(), previousNode.getRemainingCharacters(), previousNode.getPrevious());
+                nextNode.calculateBottomHalfViableSolutions(viableTotalSolutions, inputCharacters.size(), dictionary);
+                if (!viableTotalSolutions.isEmpty()) {
                     // Solution found
-                    return viable2.stream().map(Solution::new).toList();
+                    return viableTotalSolutions.stream().map(Solution::new).toList();
                 }
             }
         }
