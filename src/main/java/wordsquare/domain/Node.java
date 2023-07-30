@@ -22,24 +22,12 @@ public class Node {
         this.previous = previous;
     }
 
-    public int getPosition() {
-        return position;
-    }
-
-    public List<NodeValue> getValue() {
-        return value;
-    }
-
-    public List<String> getRemainingCharacters() {
-        return remainingCharacters;
-    }
-
-    public Node getPrevious() {
-        return previous;
-    }
-
     public static Node initialiseNode(List<String> inputCharacters) {
         return new Node(-1, new LinkedList<>(), inputCharacters, null);
+    }
+
+    public static Node fromPreviousNode(Node previousNode) {
+        return new Node(previousNode.position, previousNode.value, previousNode.remainingCharacters, previousNode.previous);
     }
 
     public int initialise() {
@@ -98,7 +86,6 @@ public class Node {
             // Calculate Node trail and add to completeSolutions list
             LinkedList<Node> nodeTrail = calculateNodeTrail();
 
-            // todo: make a List<Word> where Word has access to Dictionary
             List<String> stitchedNodes = stitchNodesTogether(nodeTrail, numberOfInputCharacters);
             if (dictionary.areWords(stitchedNodes)) {
                 // We have a grid of full (valid) words
@@ -143,9 +130,7 @@ public class Node {
         return nodeTrail;
     }
 
-    public static List<String> findTopAndLeftSideWord(List<Node> nodes) {
-        nodes.removeIf(node -> node.position == -1);
-
+    private static List<String> findTopAndLeftSideWord(List<Node> nodes) {
         // We have only worked out the top half of the grid so far, e.g.
         // h e a r t
         // e m b e
@@ -165,9 +150,7 @@ public class Node {
         return List.of(String.join("", sideWord));
     }
 
-    public static List<String> stitchNodesTogether(List<Node> nodes, int numberOfInputCharacters) {
-        // Remove start node if exists
-
+    static List<String> stitchNodesTogether(List<Node> nodes, int numberOfInputCharacters) {
         // Example grid below:
         //      f  e  a  s  t
         //   4  e  a  r  t  h
@@ -177,7 +160,6 @@ public class Node {
         //    0  1  2  3  4
         //
         // Numbers always point diagonally up right, e.g. group 0 is ttmtt
-        nodes.removeIf(node -> node.position == -1);
         LinkedList<List<NodeValue>> wordGroups = new LinkedList<>();
         for (int i = 0; i < nodes.size() / 2; i++) {
             if (i == 0) {
@@ -247,5 +229,15 @@ public class Node {
     @Override
     public int hashCode() {
         return Objects.hash(position, value, remainingCharacters);
+    }
+
+    @Override
+    public String toString() {
+        return "Node{" +
+                "position=" + position +
+                ", value=" + value +
+                ", remainingCharacters=" + remainingCharacters +
+                ", previous=" + previous +
+                '}';
     }
 }

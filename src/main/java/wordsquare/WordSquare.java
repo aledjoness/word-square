@@ -20,9 +20,6 @@ public class WordSquare {
     }
 
     public List<Solution> solve() {
-        if (size == 2) {
-            return List.of(characters.solveSize2());
-        }
         return characters.solve();
     }
 }

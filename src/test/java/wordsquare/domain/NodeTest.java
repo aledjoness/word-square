@@ -1,12 +1,14 @@
 package wordsquare.domain;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import wordsquare.FileHelper;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 
 class NodeTest {
 
@@ -36,77 +38,71 @@ class NodeTest {
                 Pair.of(List.of(new NodeValue("c"), new NodeValue("h"), new NodeValue("c")), List.of("a", "a", "b", "b", "f", "g")));
     }
 
-//    @Test
-//    void calculatesSolutions() {
-//        Node node = new Node(0, List.of(new NodeValue("a"), new NodeValue("a")),
-//                             List.of("b", "c"),
-//                             Node.initialiseNode(List.of("a", "a", "b", "c")));
-//
-//        List<LinkedList<Node>> solutions = new LinkedList<>();
-//        node.calculateFullSolutions(solutions);
-//
-//        List<Node> expected1 = List.of(new Node(2,
-//                                                List.of(new NodeValue("c")),
-//                                                List.of(),
-//                                                null),
-//                                       new Node(1,
-//                                                List.of(new NodeValue("b")),
-//                                                List.of("c"),
-//                                                null),
-//                                       new Node(0,
-//                                                List.of(new NodeValue("a"), new NodeValue("a")),
-//                                                List.of("b", "c"),
-//                                                null),
-//                                       new Node(-1,
-//                                                List.of(),
-//                                                List.of("a", "a", "b", "c"),
-//                                                null));
-//        LinkedList<Node> nodes1 = new LinkedList<>(expected1);
-//        List<Node> expected2 = List.of(new Node(2,
-//                                                List.of(new NodeValue("b")),
-//                                                List.of(),
-//                                                null),
-//                                       new Node(1,
-//                                                List.of(new NodeValue("c")),
-//                                                List.of("b"),
-//                                                null),
-//                                       new Node(0,
-//                                                List.of(new NodeValue("a"), new NodeValue("a")),
-//                                                List.of("b", "c"),
-//                                                null),
-//                                       new Node(-1,
-//                                                List.of(),
-//                                                List.of("a", "a", "b", "c"),
-//                                                null));
-//        LinkedList<Node> nodes2 = new LinkedList<>(expected2);
-//        assertThat(solutions).usingRecursiveFieldByFieldElementComparatorIgnoringFields("previous").containsExactly(
-//                nodes1,
-//                nodes2);
-//    }
-//
-//    @Test
-//    void stitchesNodesTogether() {
-//        List<Node> nodes = List.of(new Node(2,
-//                                            List.of(new NodeValue("o")),
-//                                            List.of(),
-//                                            null),
-//                                   new Node(1,
-//                                            List.of(new NodeValue("i")),
-//                                            List.of("o"),
-//                                            null),
-//                                   new Node(0,
-//                                            List.of(new NodeValue("t"), new NodeValue("t")),
-//                                            List.of("i", "o"),
-//                                            null),
-//                                   new Node(-1,
-//                                            List.of(),
-//                                            List.of("i", "o", "t", "t"),
-//                                            null));
-//
-//        // E.g. stitching i t into words (it, to)
-//        //                t o
-//        List<String> stitchedTogether = Node.stitchNodesTogether(new LinkedList<>(nodes), 4);
-//
-//        assertThat(stitchedTogether).containsExactly("it", "to");
-//    }
+    @Test
+    void calculatesViableSolutions() {
+        Node startNode = new Node(0, List.of(new NodeValue("a"), new NodeValue("a")), List.of("b", "c"), null);
+        Dictionary dictionary = Mockito.mock(Dictionary.class);
+        Mockito.when(dictionary.areWords(any())).thenReturn(true);
+
+        List<LinkedList<Node>> solutions = new LinkedList<>();
+        startNode.calculateViableSolutions(solutions, 4, dictionary);
+
+        List<Node> expected1 = List.of(new Node(1,
+                                                List.of(new NodeValue("b")),
+                                                List.of("c"),
+                                                null),
+                                       new Node(0,
+                                                List.of(new NodeValue("a"), new NodeValue("a")),
+                                                List.of("b", "c"),
+                                                null));
+        LinkedList<Node> nodes1 = new LinkedList<>(expected1);
+        List<Node> expected2 = List.of(new Node(1,
+                                                List.of(new NodeValue("c")),
+                                                List.of("b"),
+                                                null),
+                                       new Node(0,
+                                                List.of(new NodeValue("a"), new NodeValue("a")),
+                                                List.of("b", "c"),
+                                                null));
+        LinkedList<Node> nodes2 = new LinkedList<>(expected2);
+        assertThat(solutions).usingRecursiveFieldByFieldElementComparatorIgnoringFields("previous").containsExactly(
+                nodes1,
+                nodes2);
+    }
+
+    @Test
+    void calculatesBottomHalfViableSolutions() {
+        Node firstNode = new Node(0, List.of(new NodeValue("t"), new NodeValue("t")), List.of("o", "i"), null);
+
+        Dictionary dictionary = Mockito.mock(Dictionary.class);
+        Mockito.when(dictionary.areWords(List.of("ot", "ti"))).thenReturn(false);
+        Mockito.when(dictionary.areWords(List.of("it", "to"))).thenReturn(true);
+
+        List<List<String>> viableSolutions = new LinkedList<>();
+        firstNode.calculateBottomHalfViableSolutions(viableSolutions, 4, dictionary);
+
+        assertThat(viableSolutions).containsExactly(List.of("it", "to"));
+    }
+
+    @Test
+    void stitchesNodesTogether() {
+        List<Node> nodes = List.of(new Node(2,
+                                            List.of(new NodeValue("o")),
+                                            List.of(),
+                                            null),
+                                   new Node(1,
+                                            List.of(new NodeValue("i")),
+                                            List.of("o"),
+                                            null),
+                                   new Node(0,
+                                            List.of(new NodeValue("t"), new NodeValue("t")),
+                                            List.of("i", "o"),
+                                            null));
+
+        // E.g. stitching i t into words (it, to)
+        //                t o
+        List<String> stitchedTogether = Node.stitchNodesTogether(new LinkedList<>(nodes), 4);
+
+        assertThat(stitchedTogether).containsExactly("it", "to");
+    }
 }

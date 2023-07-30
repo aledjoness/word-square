@@ -53,7 +53,7 @@ class PermutationTest {
     }
 
     @Test
-    void name() {
+    void permutesInputOfSize16GroupSize4() {
         permutation = new Permutation(4, List.of("a", "a", "c", "c", "d", "e", "e", "e", "e", "m", "m", "n", "n", "n", "o", "o"));
         assertThat(permutation.calculatePermutations()).containsExactlyInAnyOrder(
                 Pair.of(List.of(new NodeValue("a"), new NodeValue("c"), new NodeValue("c"), new NodeValue("a")), List.of("d","e","e","e","e","m","m","n","n","n","o","o")),
